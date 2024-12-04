@@ -10,11 +10,14 @@ COPY . /app
 # Install the application dependencies
 RUN npm install
 
+# Install the serve package globally (to serve the build)
+RUN npm install -g serve
+
 # Build the React application
 RUN npm run build
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 80 (for production)
+EXPOSE 80
 
-# Define the entry point for the container
-CMD ["npm", "start"]
+# Serve the build folder using serve
+CMD ["serve", "-s", "build", "-l", "80"]
