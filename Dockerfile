@@ -1,23 +1,28 @@
 # Use the official Node.js image as the base image
-FROM node:18
+FROM node:18-alpine
 
-# Set the working directory in the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the application files into the working directory
-COPY . /app
+# Copy package.json and package-lock.json to the container
+COPY package*.json ./
 
-# Install the application dependencies
+# Install dependencies
 RUN npm install
 
-# Install the serve package globally (to serve the build)
-RUN npm install -g serve
+# Copy the rest of the application to the container
+COPY . .
 
-# Build the React application
+# Build the application
 RUN npm run build
 
-# Expose port 80 (for production)
+# Use an Nginx server to serve the built app
+FROM nginx:alpine
+# Copy the built files to Nginx's default HTML directory
+COPY --from=0 /app/dist /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
 
-# Serve the build folder using serve
-CMD ["serve", "-s", "build", "-l", "80"]
+# Start the Nginx server
+CMD ["nginx", "-g", "daemon off;"]
